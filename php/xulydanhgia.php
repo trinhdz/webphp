@@ -5,7 +5,7 @@
 	switch ($_POST['request']) {
 		case 'thembinhluan':
 			$masp = $_POST['masp'];
-			$mand = $_POST['mand'];
+			$mand = $_POST['Id'];
 			$sosao = $_POST['sosao'];
 			$binhluan = $_POST['binhluan'];
 			$thoigian = $_POST['thoigian'];

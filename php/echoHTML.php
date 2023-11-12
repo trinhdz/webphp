@@ -66,7 +66,6 @@ function addHeader()
                         <a onclick="checkDangXuat();">Đăng xuất</a>
                     </div>
                 </div> <!-- End Member -->
-
                 <div class="cart">
                     <a href="giohang.php">
                         <i class="fa fa-shopping-cart"></i>

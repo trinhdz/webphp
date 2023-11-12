@@ -13,8 +13,8 @@
         $matkhau = mysqli_escape_string($db->__conn, $matkhau);
 
         // mysqli_set_charset($connSanPham,"utf8");
-        $sql = "SELECT * FROM nguoidung WHERE TaiKhoan = '$taikhoan' AND MatKhau='$matkhau' AND MaQuyen!='1' AND TrangThai=1";
-
+        $sql = "SELECT * FROM nguoidung WHERE email='$taikhoan' AND MatKhau='$matkhau'";
+        
         $dsad = $db->get_list($sql);
 
         if(sizeof($dsad) > 0){

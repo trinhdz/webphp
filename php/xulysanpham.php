@@ -49,7 +49,6 @@
         case 'phanTich_Filters':
             phanTich_Filters();
             break;
-
         case 'addFromWeb1':
             addFromWeb1();
             break;
@@ -103,7 +102,7 @@
 
     function phanTich_Filters() {
         $filters = $_POST['filters'];
-        $ori = "SELECT * FROM SanPham WHERE TrangThai=1 AND SoLuong>0 AND ";
+        $ori = "SELECT * FROM sanpham WHERE TrangThai=1 AND SoLuong>0 AND ";
         $sql = $ori;
         $db = new DB_driver();
         $db->connect();
@@ -119,7 +118,7 @@
                     $dauBang[1] = explode("+", $dauBang[1]);
                     $dauBang[1] = join(" ", $dauBang[1]);
                     $dauBang[1] = mysqli_escape_string($db->__conn, $dauBang[1]);
-                    $sql .= ($sql==$ori?"":" AND ") . " TenSP LIKE '%$dauBang[1]%' ";
+                    $sql .= ($sql==$ori?"":" AND ") . " tenhang LIKE '%$dauBang[1]%' ";
                     break;
 
                 case 'price':
@@ -135,9 +134,8 @@
 
                 case 'company':
                     $companyID = $dauBang[1];
-                    $sql .= ($sql==$ori?"":" AND ") . " MaLSP='$companyID'";
+                    $sql .= ($sql==$ori?"":" AND ") . " maloaihang='$companyID'";
                     break;
-
                 case 'star':
                     $soSao = (int)$dauBang[1];
                     $sql .= ($sql==$ori?"":" AND ") . " SoSao >= $soSao";
@@ -191,7 +189,7 @@
             // thêm thông tin khuyến mãi
             $result[$i]["KM"] = (new KhuyenMaiBUS())->select_by_id('*', $result[$i]['MaKM']);
             // thêm thông tin hãng
-            $result[$i]["LSP"] = (new LoaiSanPhamBUS())->select_by_id('*', $result[$i]['MaLSP']);
+            // $result[$i]["LSP"] = (new LoaiSanPhamBUS())->select_by_id('*', $result[$i]['MaLSP']);
         }
         die (json_encode($result));
     }

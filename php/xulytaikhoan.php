@@ -24,7 +24,6 @@
 			}
 			die (json_encode(null));
 			break;
-		
 		default:
 			# code...
 			break;
@@ -39,19 +38,21 @@
 	}
 
 	function dangNhap() {
-		$taikhoan=$_POST['data_username'];
-		$matkhau=$_POST['data_pass'];
-		$matkhau=md5($matkhau);
+    $taikhoan = $_POST['data_username'];
+    $matkhau = $_POST['data_pass'];
+    $matkhau = md5($matkhau);
+    $sql = "SELECT * FROM nguoidung WHERE email='$taikhoan' AND MatKhau='$matkhau'";
+    $result = (new DB_driver())->get_row($sql);
+    if ($result) {
+        $_SESSION['currentUser'] = $result;
+        die(json_encode($result));
+		 
+    } else {
+        echo "Login failed!";
+        die(json_encode(null));
+    }
+}
 
-		$sql = "SELECT * FROM nguoidung WHERE TaiKhoan='$taikhoan' AND MatKhau='$matkhau' AND MaQuyen=1 AND TrangThai=1";
-		$result = (new DB_driver())->get_row($sql);
-
-		if($result != false){
-		    $_SESSION['currentUser']=$result;
-		    die (json_encode($result)); 
-		}  
-		die (json_encode(null));
-	}
 
 	function dangKy() {
 		$xuli_ho=$_POST['data_ho'];
@@ -60,31 +61,35 @@
 		$xuli_email=$_POST['data_email'];
 		$xuli_diachi=$_POST['data_diachi'];
 		$xuli_newUser=$_POST['data_newUser'];
-		$xuli_newPass=$_POST['data_newPass'];
-		$xuli_newPass=md5($xuli_newPass);
+		$xuli_password=$_POST['data_newPass'];
+		$newPass=md5($xuli_password);
 
 		$status = (new NguoiDungBUS())->add_new(array(
-			"MaND" => "",
-			"Ho" => $xuli_ho,
-			"Ten" => $xuli_ten,
-			"SDT" => $xuli_sdt,
+			"HoVaTen" => $xuli_ten,
+			"Sdt" => $xuli_sdt,
 			"Email" => $xuli_email,
 			"DiaChi" => $xuli_diachi,
-			"TaiKhoan" => $xuli_newUser,
-			"MatKhau" => $xuli_newPass,
-			"MaQuyen" => 1,
-			"TrangThai" => 1
+			"MatKhau" => $newPass,
+			"MaQuyen" => "USER",
 		));
 
 		// đăng nhập vào ngay
-		$sql = "SELECT * FROM nguoidung WHERE TaiKhoan='$xuli_newUser' AND MatKhau='$xuli_newPass' AND MaQuyen=1 AND TrangThai=1";
+		$sql = "SELECT * FROM nguoidung WHERE email='$xuli_email' AND MatKhau='$newPass'";
 		$result = (new DB_driver())->get_row($sql);
 
-		if($result != false){
+		if($result){
 		    $_SESSION['currentUser']=$result;
 		    die (json_encode($result)); 
 		}  
 
 		die (json_encode(null));
 	}
+
+
+function getCurrentUser() {
+    if (isset($_SESSION['currentUser'])) {
+        die(json_encode($_SESSION['currentUser']));
+    }
+    die(json_encode(null));
+}
 ?>

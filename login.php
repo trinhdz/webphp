@@ -15,6 +15,7 @@
     <script>
         
 function kiemTraDangNhap(){
+    console.log("check ")
     a=document.getElementById("username").value;
     b=document.getElementById("password").value;
     if(a == "")
@@ -38,6 +39,7 @@ function kiemTraDangNhap(){
         },
         //async:true,
         success:function(kq){
+            console.log(kq)
             if(kq.indexOf("yes")!= -1) 
                 {
                     alert("Đăng nhập thành công");
