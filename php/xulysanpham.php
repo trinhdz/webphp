@@ -21,10 +21,8 @@
             // thêm thông tin khuyến mãi và hãng
             $sp["KM"] = (new KhuyenMaiBUS())->select_by_id('*', $sp['MaKM']);
             $sp["LSP"] = (new LoaiSanPhamBUS())->select_by_id('*', $sp['MaLSP']);
-
             die (json_encode($sp));
             break;
-
         case 'getlistbyids':
             $listID = $_POST['listID'];
             $sql = "SELECT * FROM SanPham WHERE ";
@@ -33,9 +31,7 @@
                 $sql .= "MaSP=".$id." OR ";
             }
             $sql.=" 1=0";
-
             $result = (new DB_driver())->get_list($sql);
-            
             for($i = 0; $i < sizeof($result); $i++) {
                 // thêm thông tin khuyến mãi
                 $result[$i]["KM"] = (new KhuyenMaiBUS())->select_by_id('*', $result[$i]['MaKM']);
@@ -53,6 +49,32 @@
             addFromWeb1();
             break;
 
+        //thêm
+        case 'edit':
+                $data = $_POST['dataEdit'];
+                $spAddArr = array(
+                    'MaLSP' => $data['company'],
+                    'TenSP' => $data['name'],
+                    'DonGia' => $data['price'],
+                    'SoLuong' => $data['amount'],
+                    'HinhAnh' => $data['img'],
+                    'MaKM' => $data['promo']['name'],
+                    'ManHinh' => $data['detail']['screen'],
+                    'HDH' => $data['detail']['os'],
+                    'CamSau' => $data['detail']['camara'],
+                    'CamTruoc' => $data['detail']['camaraFront'],
+                    'CPU' => $data['detail']['cpu'],
+                    'Ram' => $data['detail']['ram'],
+                    'Rom' => $data['detail']['rom'],
+                    'SDCard' => $data['detail']['microUSB'],
+                    'Pin' => $data['detail']['battery'],
+                    'SoSao' => $data['star'],
+                    'SoDanhGia' => $data['rateCount'],
+                    'TrangThai' => $data['TrangThai']
+                );
+                $spBUS = new SanPhamBUS();
+                die (json_encode($spBUS->update_by_id($spAddArr,$data['masp'])));
+            break;
         //thêm
         case 'add':
                 $data = $_POST['dataAdd'];
@@ -118,7 +140,7 @@
                     $dauBang[1] = explode("+", $dauBang[1]);
                     $dauBang[1] = join(" ", $dauBang[1]);
                     $dauBang[1] = mysqli_escape_string($db->__conn, $dauBang[1]);
-                    $sql .= ($sql==$ori?"":" AND ") . " tenhang LIKE '%$dauBang[1]%' ";
+                    $sql .= ($sql==$ori?"":" AND ") . " TenSP LIKE '%$dauBang[1]%' ";
                     break;
 
                 case 'price':
@@ -134,7 +156,7 @@
 
                 case 'company':
                     $companyID = $dauBang[1];
-                    $sql .= ($sql==$ori?"":" AND ") . " maloaihang='$companyID'";
+                    $sql .= ($sql==$ori?"":" AND ") . " MaLSP='$companyID'";
                     break;
                 case 'star':
                     $soSao = (int)$dauBang[1];

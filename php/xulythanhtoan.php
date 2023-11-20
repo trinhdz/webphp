@@ -28,9 +28,14 @@
 
 			forEach($dulieu["dssp"] as $sp) {
 				$dataSp = (new SanPhamBUS())->select_by_id("*", $sp["masp"]);
-				$donGia = $dataSp["DonGia"];
+				$donGia = $dataSp["dongia"];
 
-				$chitiethdBUS->add_new(array($mahd, $sp["masp"], $sp["soLuong"], $donGia));
+				   $chitiethdBUS->add_new(array(
+       				 "MaHD" => $mahd,
+       				 "masp" => $sp["masp"],
+       				 "soluong" => $sp["soLuong"],
+        			"dongia" => $donGia
+    ));
 			}
 
 			die (json_encode(true));

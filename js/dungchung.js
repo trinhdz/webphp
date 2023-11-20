@@ -50,7 +50,6 @@ function addToGioHang(masp) {
 
 function getSoLuongGioHang() {
   var currentList = getListGioHang();
-
   var soLuong = 0;
   if (currentList != null) {
     for (var sp of currentList) {
@@ -78,16 +77,13 @@ function animateCartNumber() {
 function themVaoGioHang(masp, tensp) {
   getCurrentUser(
     (user) => {
-      if (user && user.TrangThai == 0) {
+      if (!user) {
         Swal.fire({
-          title: "Tài Khoản Bị Khóa!",
-          text: "Tài khoản của bạn hiện đang bị khóa nên không thể thêm hàng!",
+          title: "Vui lòng đăng nhập",
           type: "error",
           grow: "row",
           confirmButtonText: "Trở về",
-          footer: "<a href>Liên hệ với Admin</a>",
         });
-
         return;
       } else {
         addToGioHang(masp);
@@ -153,12 +149,10 @@ function checkTaiKhoan() {
 
 //  ================================ WEB 2 =================================
 function checkDangKy() {
-  var ho = document.getElementById("ho").value;
-  var ten = document.getElementById("ten").value;
+  var fullname = document.getElementById("fullname").value;
   var sdt = document.getElementById("sdt").value;
   var email = document.getElementById("email").value;
   var diachi = document.getElementById("diachi").value;
-  var username = document.getElementById("newUser").value;
   var pass = document.getElementById("newPass").value;
 
   $.ajax({
@@ -168,19 +162,17 @@ function checkDangKy() {
     timeout: 1500,
     data: {
       request: "dangky",
-      data_ho: ho,
-      data_ten: ten,
+      data_fullname: fullname,
       data_sdt: sdt,
       data_email: email,
       data_diachi: diachi,
-      data_newUser: username,
       data_newPass: pass,
     },
     success: function (kq) {
       if (kq != null) {
         Swal.fire({
           type: "success",
-          title: "Đăng kí thành công " + kq.TaiKhoan,
+          title: "Đăng kí thành công " + kq.HoVaTen,
           text: "Bạn sẽ được đăng nhập tự động",
           confirmButtonText: "Tuyệt",
         }).then((result) => {
@@ -205,7 +197,6 @@ function checkDangKy() {
 function checkDangNhap() {
   var a = document.getElementById("username").value;
   var b = document.getElementById("pass").value;
-
   $.ajax({
     url: "php/xulytaikhoan.php",
     type: "post",
@@ -225,6 +216,11 @@ function checkDangNhap() {
           text: "Chào " + data.HoVaTen,
         }).then((result) => {
           capNhatThongTinUser();
+          getCurrentUser((data) => {
+            if (data["MaQuyen"] === "ADMIN") {
+              window.location = "admin.php";
+            }
+          });
         });
         showTaiKhoan(false);
       } else {
@@ -273,8 +269,9 @@ function checkDangXuat(onSuccess) {
               capNhatThongTinUser();
               setListGioHang(null);
               animateCartNumber();
+              window.location.href = "index.php";
+              console.log("logout");
             });
-
             if (onSuccess) onSuccess();
           } else {
             Swal.fire({
@@ -298,19 +295,15 @@ function checkDangXuat(onSuccess) {
 
 function capNhatThongTinUser() {
   getCurrentUser((data) => {
-    if (data["MaQuyen"] === "ADMIN") {
-      window.location = "admin.php";
-      exit();
-    }
     if (!data) {
       document.getElementById("btnTaiKhoan").innerHTML =
         '<i class="fa fa-user"></i> Tài khoản';
       document.getElementsByClassName("menuMember")[0].classList.add("hide");
-    } else {
-      document.getElementById("btnTaiKhoan").innerHTML =
-        '<i class="fa fa-user"></i> ' + data["HoVaTen"];
-      document.getElementsByClassName("menuMember")[0].classList.remove("hide");
+      return;
     }
+    document.getElementById("btnTaiKhoan").innerHTML =
+      '<i class="fa fa-user"></i> ' + data["HoVaTen"];
+    document.getElementsByClassName("menuMember")[0].classList.remove("hide");
   });
 }
 
@@ -796,25 +789,25 @@ $(".tab a").on("click", function (e) {
   $(target).fadeIn(600);
 });
 
-for (var p of list_products) {
-  switch (p.promo.name) {
-    case "tragop":
-      p.MaKM = 4;
-      break;
+// for (var p of list_products) {
+//   switch (p.promo.name) {
+//     case "tragop":
+//       p.MaKM = 4;
+//       break;
 
-    case "giareonline":
-      p.MaKM = 3;
-      break;
+//     case "giareonline":
+//       p.MaKM = 3;
+//       break;
 
-    case "giamgia":
-      p.MaKM = 2;
-      break;
+//     case "giamgia":
+//       p.MaKM = 2;
+//       break;
 
-    case "moiramat":
-      p.MaKM = 5;
-      break;
+//     case "moiramat":
+//       p.MaKM = 5;
+//       break;
 
-    default:
-      p.MaKM = 1;
-  }
-}
+//     default:
+//       p.MaKM = 1;
+//   }
+// }

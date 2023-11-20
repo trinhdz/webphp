@@ -9,6 +9,7 @@
 				$dslsp = (new LoaiSanPhamBUS())->select_all();
 		    	die (json_encode($dslsp));
     		break;
+		
     	default:
     		# code...
     		break;

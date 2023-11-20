@@ -197,7 +197,7 @@ function addChiTietSanPham()
                 </div>
                 <div class="area_order">
                     <!-- nameProduct là biến toàn cục được khởi tạo giá trị trong phanTich_URL_chiTietSanPham -->
-                    <a class="buy_now" onclick="themVaoGioHang(maProduct, nameProduct);">
+                    <a class="buy_now" ">
                         <h3><i class="fa fa-plus"></i> Thêm vào giỏ hàng</h3>
                     </a>
                 </div>
@@ -213,7 +213,7 @@ function addChiTietSanPham()
         <div class="comment-area">
             <div class="guiBinhLuan">
                 <div class="stars">
-                    <form action="">
+                    <form action="POST">
                         <input class="star star-5" id="star-5" value="5" type="radio" name="star"/>
                         <label class="star star-5" for="star-5" title="Tuyệt vời"></label>
 
@@ -297,46 +297,30 @@ function addContainTaiKhoan()
                     <h1>Đăng kí miễn phí</h1>
                     <!-- <form onsubmit="return signUp(this);"> -->
                     <form action="" method="post" name="formDangKy" onsubmit="return checkDangKy();">
-                        <div class="top-row">
                             <div class="field-wrap">
-                                <label>
-                                    Họ<span class="req">*</span>
-                                </label>
-                                <input name="ho" type="text" id="ho" required autocomplete="off" />
-                            </div>
-                            <div class="field-wrap">
-                                <label>
-                                    Tên<span class="req">*</span>
-                                </label>
-                                <input name="ten" id="ten" type="text" required autocomplete="off" />
-                            </div>
-                        </div> <!-- / ho ten -->
-                        <div class="top-row">
+                            <label>
+                                Fullname<span class="req">*</span>
+                            </label>
+                            <input name="fullname" id="fullname" type="text" required autocomplete="off" />
+                             </div> 
                             <div class="field-wrap">
                                 <label>
                                     Điện thoại<span class="req">*</span>
                                 </label>
                                 <input name="sdt" id="sdt" type="text" pattern="\d*" minlength="10" maxlength="12" required autocomplete="off" />
                             </div> <!-- /sdt -->
-                            <div class="field-wrap">
-                                <label>
-                                    Email<span class="req">*</span>
-                                </label>
-                                <input name="email" id="email" type="email" required autocomplete="off" />
-                            </div> <!-- /email -->
-                        </div>
                         <div class="field-wrap">
                             <label>
                                 Địa chỉ<span class="req">*</span>
                             </label>
                             <input name="diachi" id="diachi" type="text" required autocomplete="off" />
                         </div> <!-- /user name -->
-                        <div class="field-wrap">
-                            <label>
-                                Tên đăng nhập<span class="req">*</span>
-                            </label>
-                            <input name="newUser" id="newUser" type="text" required autocomplete="off" />
-                        </div> <!-- /user name -->
+                          <div class="field-wrap">
+                                <label>
+                                    Email<span class="req">*</span>
+                                </label>
+                                <input name="email" id="email" type="email" required autocomplete="off" />
+                            </div> <!-- /email -->
                         <div class="field-wrap">
                             <label>
                                 Mật khẩu<span class="req">*</span>

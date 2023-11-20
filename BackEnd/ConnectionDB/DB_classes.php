@@ -70,7 +70,7 @@ class NguoiDungBUS extends DB_business
 {
     function __construct()
     {
-        $this->setTable("NguoiDung", "MaND");
+        $this->setTable("NguoiDung", "Id");
     }
 
     function add_new($data)

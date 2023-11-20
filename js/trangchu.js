@@ -222,7 +222,7 @@ function setupCompany() {
     success: function (data, status, xhr) {
       DataCompany = data;
       for (var c of data) {
-        addCompany("img/company/" + c.HinhAnh, c.maloaihang);
+        addCompany("img/company/" + c.HinhAnh, c.MaLSP);
       }
     },
     error: function (e) {
@@ -404,7 +404,7 @@ function addToWeb(p, ele, returnString) {
 
   // tách theo dấu ' ' vào gắn lại bằng dấu '-', code này giúp bỏ hết khoảng trắng và thay vào bằng dấu '-'.
   // Tạo link tới chi tiết sản phẩm, chuyển tất cả ' ' thành '-'
-  var chitietSp = "chitietsanpham.php?" + p.mahang;
+  var chitietSp = "chitietsanpham.php?" + p.MaSP;
 
   // Cho mọi thứ vào tag <li>... </li>
   var newLi =
@@ -416,7 +416,7 @@ function addToWeb(p, ele, returnString) {
     p.HinhAnh +
     `" alt="">
             <h3>` +
-    p.tenhang +
+    p.TenSP +
     `</h3>
             <div class="price">
                 ` +
@@ -435,7 +435,7 @@ function addToWeb(p, ele, returnString) {
                 <button class="themvaogio" onclick="return themVaoGioHang('` +
     p.MaSP +
     `', '` +
-    p.tenhang +
+    p.TenSP +
     `');">
                     <span class="tooltiptext" style="font-size: 15px;">Thêm vào giỏ</span>
                     +
@@ -678,13 +678,12 @@ function addAllChoosedFilter(filters) {
       var data = f.split("=");
       var type = data[0];
       var value = data[1];
-
       switch (type) {
         case "company":
           var tenHang = "";
           for (var c of DataCompany) {
             if (c.MaLSP == value) {
-              tenHang = c.TenLSP;
+              tenHang = c.tenloaihang;
             }
           }
           addChoosedFilter("company", "Hãng " + tenHang);
@@ -815,7 +814,6 @@ function addCompany(img, nameCompany) {
     `'])"><img src=` +
     img +
     `></button>`;
-
   var khung_hangSanXuat = document.getElementsByClassName("companyMenu")[0];
   khung_hangSanXuat.innerHTML += new_tag;
 }

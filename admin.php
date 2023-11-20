@@ -44,7 +44,7 @@
             <li class="nav-item" onclick="refreshTableSanPham()"><a class="nav-link"><i class="fa fa-th-large"></i> Sản Phẩm</a></li>
             <!-- <li class="nav-item" onclick="refreshTableDonHang()"><a class="nav-link"><i class="fa fa-file-text-o"></i> Đơn Hàng</a></li> -->
             <li class="nav-item" onclick="refreshTableKhachHang()"><a class="nav-link"><i class="fa fa-address-book-o"></i> Khách Hàng</a></li>
-            <li class="nav-item"><a class="nav-link"><i class="fa fa-bar-chart-o"></i> Thống Kê</a></li>
+            <li class="nav-item"><a class="nav-link active"><i class="fa fa-bar-chart-o"></i> Thống Kê</a></li>
             <hr>
             <li class="nav-item">
                 <a class="nav-link" id="btnDangXuat">
@@ -153,35 +153,11 @@
                                 </select>
                             </td>
                         </tr>
-                        <?php
-                            $tenfilemoi= "";
-                                if (isset($_POST["submit"]))
-                                {
-                                    if (($_FILES["hinhanh"]["type"]=="image/jpeg") ||($_FILES["hinhanh"]["type"]=="image/png") || ($_FILES["hinhanh"]["type"]=="image/jpg") && ($_FILES["hinhanh"]["size"] < 50000) )
-                                    {
-                                        if ($_FILES["file"]["error"] > 0 || file_exists("img/products/" . basename($_FILES["hinhanh"]["name"]))) 
-                                        {
-                                            echo ("Error Code: " . $_FILES["file"]["error"] . "<br />Chỉnh sửa ảnh lại sau)");
-                                        }
-                                        else
-                                        {
-                                            /*$tmp = explode(".", $_FILES["hinhanh"]["name"]);
-                                            $duoifile = end($tmp);
-                                            $masp = $_POST['maspThem'];
-                                            $tenfilemoi = $masp . "." . $duoifile;*/
-                                            $file = $_FILES["hinhanh"]["name"];
-                                            $tenfilemoi = "img/products/" .$_FILES["hinhanh"]["name"];
-                                            move_uploaded_file( $_FILES["hinhanh"]["tmp_name"], $tenfilemoi);
-                                        }
-                                    }
-                                }
-                        // require_once ("php/uploadfile.php");
-                        ?>
                         <tr>
                             <td>Hình:</td>
                             <td>
                                 <img class="hinhDaiDien" id="anhDaiDienSanPhamThem" src="">
-                                <input type="file" name="hinhanh" onchange="capNhatAnhSanPham(this.files, 'anhDaiDienSanPhamThem', '<?php echo $tenfilemoi; ?>')">
+                                <input type="file" name="hinhanh" onchange="uploadFileOnChange(this.files, 'anhDaiDienSanPhamThem')">
                                 <input style="display: none;" type="text" id="hinhanh" value="">
                             </td>
                         </tr>
@@ -311,8 +287,6 @@
                     <th title="Sắp xếp"  onclick="sortKhachHangTable('stt')">Stt <i class="fa fa-sort"></i></th>
                     <th title="Sắp xếp"  onclick="sortKhachHangTable('hoten')">Họ tên <i class="fa fa-sort"></i></th>
                     <th title="Sắp xếp"  onclick="sortKhachHangTable('email')">Email <i class="fa fa-sort"></i></th>
-                    <th title="Sắp xếp" onclick="sortKhachHangTable('taikhoan')">Tài khoản <i class="fa fa-sort"></i></th>
-                
                     <th style="width: 10%">Hành động</th>
                 </tr>
             </table>
@@ -324,7 +298,6 @@
                 <select name="kieuTimKhachHang">
                     <option value="ten">Tìm theo họ tên</option>
                     <option value="email">Tìm theo email</option>
-                    <option value="taikhoan">Tìm theo tài khoản</option>
                 </select>
                 <input type="text" placeholder="Tìm kiếm..." onkeyup="timKiemNguoiDung(this)">
                 <button onclick="openThemNguoiDung()"><i class="fa fa-plus-square"></i> Thêm người dùng</button>
@@ -333,9 +306,9 @@
 
         <!-- Thống kê -->
         <div class="thongke">
-            <div class="canvasContainer">
+            <!-- <div class="canvasContainer">
                 <canvas id="myChart1"></canvas>
-            </div>
+            </div> -->
 
             <div class="canvasContainer">
                 <canvas id="myChart2"></canvas>
@@ -345,9 +318,9 @@
                 <canvas id="myChart3"></canvas>
             </div>
 
-            <div class="canvasContainer">
+            <!-- <div class="canvasContainer">
                 <canvas id="myChart4"></canvas>
-            </div>
+            </div> -->
 
         </div>
     </div> <!-- // main -->

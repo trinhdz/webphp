@@ -46,7 +46,6 @@
     if ($result) {
         $_SESSION['currentUser'] = $result;
         die(json_encode($result));
-		 
     } else {
         echo "Login failed!";
         die(json_encode(null));
@@ -55,24 +54,20 @@
 
 
 	function dangKy() {
-		$xuli_ho=$_POST['data_ho'];
-		$xuli_ten=$_POST['data_ten'];
+		$xuli_fullname=$_POST['data_fullname'];
 		$xuli_sdt=$_POST['data_sdt'];
 		$xuli_email=$_POST['data_email'];
 		$xuli_diachi=$_POST['data_diachi'];
-		$xuli_newUser=$_POST['data_newUser'];
 		$xuli_password=$_POST['data_newPass'];
 		$newPass=md5($xuli_password);
-
 		$status = (new NguoiDungBUS())->add_new(array(
-			"HoVaTen" => $xuli_ten,
+			"HoVaTen" => $xuli_fullname,
 			"Sdt" => $xuli_sdt,
 			"Email" => $xuli_email,
 			"DiaChi" => $xuli_diachi,
 			"MatKhau" => $newPass,
 			"MaQuyen" => "USER",
 		));
-
 		// đăng nhập vào ngay
 		$sql = "SELECT * FROM nguoidung WHERE email='$xuli_email' AND MatKhau='$newPass'";
 		$result = (new DB_driver())->get_row($sql);
@@ -81,7 +76,6 @@
 		    $_SESSION['currentUser']=$result;
 		    die (json_encode($result)); 
 		}  
-
 		die (json_encode(null));
 	}
 

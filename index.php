@@ -64,7 +64,6 @@
 		addContainTaiKhoan();
 		addPlc();
 	?>
-
 	<div class="footer">
 		<?php addFooter(); ?>
 	</div>

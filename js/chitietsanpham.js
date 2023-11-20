@@ -27,7 +27,6 @@ function phanTichURL_Web2() {
       id: maProduct,
     },
     success: function (data, status, xhr) {
-      // console.log(data);
       addChiTietToWeb(data);
       nameProduct = data.TenSP;
     },
@@ -62,7 +61,7 @@ function addChiTietToWeb(p) {
   // Cập nhật giá + label khuyến mãi
   var area_price = divChiTiet.getElementsByClassName("area_price")[0];
   // Chuyển giá tiền sang dạng tag html
-  var giaTri = parseInt(p.DonGia);
+  var giaTri = parseInt(p.dongia);
   var giaTrikhuyenMai = parseInt(p.KM.GiaTriKM);
   var giaTriSauKM = giaTri - giaTrikhuyenMai;
 
@@ -104,6 +103,10 @@ function addChiTietToWeb(p) {
 
   // Cập nhật hình
   var hinh = divChiTiet.getElementsByClassName("picture")[0];
+  var buynow = divChiTiet.getElementsByClassName("buy_now")[0];
+  buynow.addEventListener("click", () => {
+    themVaoGioHang(p.MaSP, p.TenSP);
+  });
   hinh = hinh.getElementsByTagName("img")[0];
   hinh.src = p.HinhAnh;
 
@@ -175,8 +178,8 @@ function guiBinhLuan(nguoidung) {
     timeout: 1500, // sau 1.5 giây mà không phản hồi thì dừng => hiện lỗi
     data: {
       request: "thembinhluan",
-      masp: maProduct,
-      mand: nguoidung.MaND,
+      maProduct,
+      maND: nguoidung.Id,
       sosao: soSao,
       binhluan: binhLuan,
       thoigian: new Date().toMysqlFormat(),
@@ -202,11 +205,27 @@ function refreshBinhLuan() {
       masp: maProduct,
     },
     success: function (data, status, xhr) {
-      var div = document.getElementsByClassName("comment-content")[0];
-      div.innerHTML = "";
+      var divChiTiet = document.getElementsByClassName("chitietSanpham")[0];
+      // lấy dom div container
+      var containerComment =
+        document.getElementsByClassName("comment-content")[0];
+      // // Cập nhật sao
+      var rating = "";
+      if (data.length > 0) {
+        rating = getRateStar(4);
+        rating += `<span> ` + data.length + ` đánh giá </span>`;
+        divChiTiet.getElementsByClassName("rating")[0].innerHTML = rating;
+      } else {
+        divChiTiet.getElementsByClassName("rating")[0].innerHTML =
+          "Chưa có đánh giá nào .";
+      }
+      // reset lại comment
+      containerComment.innerHTML = "";
+
       for (var b of data) {
-        div.innerHTML += createComment(
-          b.ND.TaiKhoan,
+        // thêm vào div container
+        containerComment.innerHTML += createComment(
+          b.ND.HoVaTen,
           b.BinhLuan,
           getRateStar(b.SoSao),
           b.NgayLap

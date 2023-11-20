@@ -4,8 +4,8 @@
 
 	switch ($_POST['request']) {
 		case 'thembinhluan':
-			$masp = $_POST['masp'];
-			$mand = $_POST['Id'];
+			$masp = $_POST['maProduct'];
+			$mand = $_POST['maND'];
 			$sosao = $_POST['sosao'];
 			$binhluan = $_POST['binhluan'];
 			$thoigian = $_POST['thoigian'];
@@ -22,11 +22,9 @@
 
 			die (json_encode($spBUS->themDanhGia($masp)));
 			break;
-
 		case 'getbinhluan':
 			$masp = $_POST['masp'];
 			$dsbl = (new DB_driver())->get_list("SELECT * FROM danhgia WHERE MaSP=$masp");
-
 			for($i = 0; $i < sizeof($dsbl); $i++) {
 				$dsbl[$i]["ND"] = (new NguoiDungBUS())->select_by_id('*', $dsbl[$i]['MaND']);
 			}

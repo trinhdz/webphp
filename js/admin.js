@@ -1,9 +1,16 @@
 var TONGTIEN = 0;
+var DataCompany = [];
+var imgEdit;
+
+let listCategoryOrder = [];
+let listCategoryOrderValue = [];
+let listCategoryProduct = [];
+let listCategoryProductValue = [];
 
 window.onload = function () {
   document.getElementById("btnDangXuat").onclick = function () {
     checkDangXuat(() => {
-      window.location.href = "login.php";
+      window.location.href = "index.php";
     });
   };
 
@@ -11,8 +18,8 @@ window.onload = function () {
     (user) => {
       if (user != null && user.MaQuyen != 1) {
         addEventChangeTab();
-        addThongKe();
-        openTab("Home");
+        initThongKe();
+        openTab("Thống Kê");
       } else {
         document.body.innerHTML = `<h1 style="color:red; with:100%; text-align:center; margin: 50px;"> Truy cập bị từ chối.. </h1>`;
       }
@@ -21,6 +28,7 @@ window.onload = function () {
       document.body.innerHTML = `<h1 style="color:red; with:100%; text-align:center; margin: 50px;"> Truy cập bị từ chối.. </h1>`;
     }
   );
+  setupCompany();
 };
 
 function refreshTableSanPham() {
@@ -52,15 +60,41 @@ function addChart(id, chartOption) {
   var chart = new Chart(ctx, chartOption);
 }
 
+function initThongKe() {
+  $.ajax({
+    type: "GET",
+    url: "php/thongke.php",
+    dataType: "json",
+    // timeout: 1500, // sau 1.5 giây mà không phản hồi thì dừng => hiện lỗi
+    data: {
+      request: "getthongke",
+    },
+    success: function (data, status, xhr) {
+      data.resultOrder.forEach((element) => {
+        listCategoryOrder.push(element.Category);
+        listCategoryOrderValue.push(+element.TotalSold);
+      });
+      data.resultProduct.forEach((element) => {
+        listCategoryProduct.push(element.Category);
+        listCategoryProductValue.push(+element.TotalSold);
+      });
+      addThongKe();
+    },
+    error: function (e) {
+      console.log(e);
+    },
+  });
+}
+
 function addThongKe() {
-  var dataChart = {
+  var dataOrderChart = {
     type: "bar",
     data: {
-      labels: ["Apple", "Samsung", "Xiaomi", "Vivo", "Oppo", "Mobiistar"],
+      labels: listCategoryOrder,
       datasets: [
         {
-          label: "Số lượng bán ra",
-          data: [12, 19, 10, 5, 20, 5],
+          label: "Thống kê loại sản phẩm đã bán được",
+          data: listCategoryOrderValue,
           backgroundColor: [
             "rgba(255, 99, 132, 0.2)",
             "rgba(54, 162, 235, 0.2)",
@@ -86,27 +120,73 @@ function addThongKe() {
         fontColor: "#fff",
         fontSize: 25,
         display: true,
-        text: "Sản phẩm bán ra",
+        text: "Thống kê loại sản phẩm đã bán được",
+      },
+    },
+  };
+
+  var dataProductChart = {
+    type: "bar",
+    data: {
+      labels: listCategoryProduct,
+      datasets: [
+        {
+          label: "Thống kê loại sản phẩm đã bán được",
+          data: listCategoryProductValue,
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.2)",
+            "rgba(54, 162, 235, 0.2)",
+            "rgba(255, 206, 86, 0.2)",
+            "rgba(75, 192, 192, 0.2)",
+            "rgba(153, 102, 255, 0.2)",
+            "rgba(255, 159, 64, 0.2)",
+            "rgba(250, 99, 132, 0.2)",
+            "rgba(54, 162, 230, 0.2)",
+            "rgba(255, 206, 86, 0.2)",
+            "rgba(75, 192, 192, 0.2)",
+            "rgba(153, 102, 255, 0.2)",
+            "rgba(255, 159, 64, 0.2)",
+          ],
+          borderColor: [
+            "rgba(255,99,132,1)",
+            "rgba(54, 162, 235, 1)",
+            "rgba(255, 206, 86, 1)",
+            "rgba(75, 192, 192, 1)",
+            "rgba(153, 102, 255, 1)",
+            "rgba(255, 159, 64, 1)",
+          ],
+          borderWidth: 2,
+        },
+      ],
+    },
+    options: {
+      title: {
+        fontColor: "#fff",
+        fontSize: 25,
+        display: true,
+        text: "Thống kê sản phẩm trong kho ",
       },
     },
   };
 
   // Thêm thống kê
-  var barChart = copyObject(dataChart);
-  barChart.type = "bar";
-  addChart("myChart1", barChart);
+  // var barChart = copyObject(dataChart);
+  // barChart.type = "bar";
+  // addChart("myChart1", barChart);
 
-  var doughnutChart = copyObject(dataChart);
+  // Thông kê loại sản phẩm bán được
+  var doughnutChart = copyObject(dataOrderChart);
   doughnutChart.type = "doughnut";
   addChart("myChart2", doughnutChart);
 
-  var pieChart = copyObject(dataChart);
+  // Thống kê các sản phẩm
+  var pieChart = copyObject(dataProductChart);
   pieChart.type = "pie";
   addChart("myChart3", pieChart);
 
-  var lineChart = copyObject(dataChart);
-  lineChart.type = "line";
-  addChart("myChart4", lineChart);
+  // var lineChart = copyObject(dataChart);
+  // lineChart.type = "line";
+  // addChart("myChart4", lineChart);
 }
 
 function ajaxLoaiSanPham() {
@@ -129,7 +209,7 @@ function showLoaiSanPham(data) {
   var s = "";
   for (var i = 0; i < data.length; i++) {
     var p = data[i];
-    s += `<option value="` + p.MaLSP + `">` + p.TenLSP + `</option>`;
+    s += `<option value="` + p.MaLSP + `">` + p.tenloaihang + `</option>`;
   }
   document.getElementsByName("chonCompany")[0].innerHTML = s;
 }
@@ -234,9 +314,6 @@ function openTab(nameTab) {
 
   // mở tab
   switch (nameTab) {
-    case "Home":
-      document.getElementsByClassName("home")[0].style.display = "block";
-      break;
     case "Sản Phẩm":
       document.getElementsByClassName("sanpham")[0].style.display = "block";
       break;
@@ -272,7 +349,7 @@ function addTableProducts(list_products) {
       `</td>
             <td style="width: 40%">
                 <a title="Xem chi tiết" target="_blank" href="chitietsanpham.php?` +
-      p.TenSP.split(" ").join("-") +
+      p.MaSP +
       `">` +
       p.TenSP +
       `</a>
@@ -281,7 +358,7 @@ function addTableProducts(list_products) {
       `"></img>
             </td>
             <td style="width: 15%">` +
-      parseInt(p.DonGia).toLocaleString() +
+      parseInt(p.dongia).toLocaleString() +
       `</td>
             <td style="width: 10%">` +
       /*promoToStringValue(*/ p.KM.TenKM /*)*/ +
@@ -343,118 +420,12 @@ function timKiemSanPham(inp) {
   }
 }
 
-// Thêm
-function layThongTinSanPhamTuTable(id) {
-  var khung = document.getElementById(id);
-  var tr = khung.getElementsByTagName("tr");
-
-  var masp = tr[1]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var name = tr[2]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var company = tr[3]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("select")[0].value;
-  var img = document.getElementById("hinhanh").value;
-  var price = tr[5]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var amount = tr[6]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var star = tr[7]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var rateCount = tr[8]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var promoName = tr[9]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("select")[0].value;
-  var promoValue = tr[10]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-
-  var screen = tr[12]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var os = tr[13]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var camara = tr[14]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var camaraFront = tr[15]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var cpu = tr[16]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var ram = tr[17]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var rom = tr[18]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var microUSB = tr[19]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-  var battery = tr[20]
-    .getElementsByTagName("td")[1]
-    .getElementsByTagName("input")[0].value;
-
-  return {
-    name: name,
-    img: img,
-    price: price,
-    company: company,
-    amount: amount,
-    star: star,
-    rateCount: rateCount,
-    promo: {
-      name: promoName,
-      value: promoValue,
-    },
-    detail: {
-      screen: screen,
-      os: os,
-      camara: camara,
-      camaraFront: camaraFront,
-      cpu: cpu,
-      ram: ram,
-      rom: rom,
-      microUSB: microUSB,
-      battery: battery,
-    },
-    masp: masp,
-    TrangThai: 1,
-  };
-}
-
 function themSanPham() {
   var newSp = layThongTinSanPhamTuTable("khungThemSanPham");
-
-  //kt tên sp
-  var pattCheckTenSP = /([a-z A-Z0-9&():.'_-]{2,})$/;
-  if (pattCheckTenSP.test(newSp.name) == false) {
-    alert("Tên sản phẩm không hợp lệ");
-    return false;
-  }
-
-  //kt hình
-  /*var pattCheckHinh= /^([0-9]{1,})[.](png|jpeg|jpg)$/;
-    if (pattCheckHinh.test(newSp.img) == false)
-    {
-        alert ("Ảnh không hợp lệ");
-        return false;
-    }*/
-
   //kt giá tiền
   var pattCheckGia = /^([0-9]){1,}(000)$/;
   if (pattCheckGia.test(newSp.price) == false) {
-    alert("Đơn giá sản phẩm không hợp lệ");
+    alert("Đơn giá sản phẩm không hợp lệ , vui lòng nhập dạng x.xxx.000");
     return false;
   }
 
@@ -464,6 +435,8 @@ function themSanPham() {
     alert("Số lượng sản phẩm không hợp lệ");
     return false;
   }
+
+  newSp.img = imgEdit;
 
   $.ajax({
     type: "POST",
@@ -495,9 +468,13 @@ function themSanPham() {
   alert('Thêm sản phẩm "' + newSp.name + '" thành công.');
   refreshTableSanPham();
 }
+
 function resetForm() {
   var khung = document.getElementById("khungThemSanPham");
+  var khungEdit = document.getElementById("khungSuaSanPham");
+
   var tr = khung.getElementsByTagName("tr");
+  var tr2 = khungEdit.getElementsByTagName("tr");
 
   tr[2].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
     "";
@@ -524,6 +501,33 @@ function resetForm() {
   tr[19].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
     "";
   tr[20].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+
+  tr2[2].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+  tr2[4].getElementsByTagName("td")[1].getElementsByTagName("img")[0].src = "";
+  tr2[5].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+  tr2[6].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "0";
+
+  tr2[12].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+  tr2[13].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+  tr2[14].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+  tr2[15].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+  tr2[16].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+  tr2[17].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+  tr2[18].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+  tr2[19].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
+    "";
+  tr2[20].getElementsByTagName("td")[1].getElementsByTagName("input")[0].value =
     "";
 }
 
@@ -597,11 +601,183 @@ function xoaSanPham(trangthai, masp, tensp) {
   }
 }
 
+function layThongTinSanPhamTuTable(id) {
+  var khung = document.getElementById(id);
+  var tr = khung.getElementsByTagName("tr");
+
+  var masp = tr[1]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+
+  var name = tr[2]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+
+  var company = tr[3]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("select")[0].value;
+
+  var img = document.getElementById("hinhanh").value;
+
+  var price = tr[5]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+
+  var amount = tr[6]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+
+  var star = tr[7]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+
+  var rateCount = tr[8]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+
+  var promoName = tr[9]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("select")[0].value;
+  console.log(
+    "🚀 ~ file: admin.js:381 ~ layThongTinSanPhamTuTable ~ promoName:",
+    promoName
+  );
+
+  var promoValue = tr[10]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+
+  var screen = tr[12]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+
+  var os = tr[13]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+  var camara = tr[14]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+  var camaraFront = tr[15]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+  var cpu = tr[16]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+  var ram = tr[17]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+  var rom = tr[18]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+  var microUSB = tr[19]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+  var battery = tr[20]
+    .getElementsByTagName("td")[1]
+    .getElementsByTagName("input")[0].value;
+  return {
+    name: name,
+    img: img,
+    price: price,
+    company: company,
+    amount: amount,
+    star: star,
+    rateCount: rateCount,
+    promo: {
+      name: promoName,
+      value: promoValue,
+    },
+    detail: {
+      screen: screen,
+      os: os,
+      camara: camara,
+      camaraFront: camaraFront,
+      cpu: cpu,
+      ram: ram,
+      rom: rom,
+      microUSB: microUSB,
+      battery: battery,
+    },
+    masp: masp,
+    TrangThai: 1,
+  };
+}
 // Sửa
-function suaSanPham(masp) {
-  var Sp = layThongTinSanPhamTuTable("khungSuaSanPham");
-  console.log(Sp);
-  return false;
+function suaSanPham(event) {
+  event.preventDefault();
+
+  var spEdit = layThongTinSanPhamTuTable("khungSuaSanPham");
+  if (spEdit.length <= 0) {
+    alert("Tên sản phẩm không hợp lệ");
+    return false;
+  }
+
+  //kt giá tiền
+  var pattCheckGia = /^([0-9]){1,}(000)$/;
+  if (pattCheckGia.test(spEdit.price) == false) {
+    alert("Đơn giá sản phẩm không hợp lệ , vui lòng nhập dạng x.xxx.000");
+    return false;
+  }
+
+  //kt số lượng
+  var pattCheckSL = /[0-9]{1,}$/;
+  if (pattCheckSL.test(spEdit.amount) == false) {
+    alert("Số lượng sản phẩm không hợp lệ");
+    return false;
+  }
+
+  spEdit.img = imgEdit;
+
+  $.ajax({
+    type: "POST",
+    url: "php/xulysanpham.php",
+    dataType: "json",
+    // timeout: 1500, // sau 1.5 giây mà không phản hồi thì dừng => hiện lỗi
+    data: {
+      request: "edit",
+      dataEdit: spEdit,
+    },
+    success: function (data, status, xhr) {
+      Swal.fire({
+        type: "success",
+        title: "Sửa thành công",
+      });
+      resetForm();
+      document.getElementById("khungSuaSanPham").style.transform = "scale(0)";
+      refreshTableSanPham();
+    },
+    error: function (e) {
+      Swal.fire({
+        type: "error",
+        title: "Lỗi edit",
+        html: e.responseText,
+      });
+    },
+  });
+  refreshTableSanPham();
+}
+
+// chọn hãng
+function setupCompany() {
+  $.ajax({
+    type: "POST",
+    url: "php/xulyloaisanpham.php",
+    dataType: "json",
+    timeout: 1500, // sau 1.5 giây mà không phản hồi thì dừng => hiện lỗi
+    data: {
+      request: "getall",
+    },
+    success: function (data, status, xhr) {
+      DataCompany = data;
+    },
+    error: function (e) {
+      Swal.fire({
+        type: "error",
+        title: "Lỗi lấy dữ liệu loại sản phẩm (trangchu.js > setupCompany)",
+        html: e.responseText,
+      });
+    },
+  });
 }
 
 function addKhungSuaSanPham(masp) {
@@ -611,119 +787,82 @@ function addKhungSuaSanPham(masp) {
       sp = p;
     }
   }
-
   var s =
-    `<span class="close" onclick="this.parentElement.style.transform = 'scale(0)';">&times;</span>
-    <form method="post" action="" enctype="multipart/form-data" onsubmit="return suaSanPham('` +
-    sp.MaSP +
-    `')">
-        <table class="overlayTable table-outline table-content table-header">
-            <tr>
-                <th colspan="2">` +
-    sp.TenSP +
-    `</th>
-            </tr>
-            <tr>
-                <td>Mã sản phẩm:</td>
-                <td><input disabled="disabled" type="text" id="maspSua" name="maspSua" value="` +
+    `
+   <span class="close" onclick="this.parentElement.style.transform = 'scale(0)';">&times;</span>
+                <form method="post" action="" enctype="multipart/form-data" onsubmit="return suaSanPham(event);">
+                    <table class="overlayTable table-outline table-content table-header">
+                        <tr>
+                            <th colspan="2">Sửa sản phẩm</th>
+                        </tr>
+                        <tr>
+                            <td>Mã sản phẩm:</td>
+                            <td><input disabled="disabled" type="text" id="maspThem" name="maspThem" value="` +
     sp.MaSP +
     `"></td>
-            </tr>
-            <tr>
-                <td>Tên sẩn phẩm:</td>
-                <td><input type="text" value="` +
+                        </tr>
+                        <tr>
+                            <td>Tên sản phẩm:</td>
+                            <td><input type="text" value="` +
     sp.TenSP +
     `"></td>
-            </tr>
-            <tr>
-                <td>Hãng:</td>
-                <td>
-                    <select name="chonCompany" onchange="autoMaSanPham(this.value)">`;
+                        </tr>
+                        <tr>
+                            <td>Hãng:</td>
+                            <td>
+                                <select name="chonCompany"">`;
 
-  var company = [
-    "Apple",
-    "Coolpad",
-    "HTC",
-    "Itel",
-    "Mobell",
-    "Vivo",
-    "Oppo",
-    "SamSung",
-    "Phillips",
-    "Nokia",
-    "Motorola",
-    "Motorola",
-    "Xiaomi",
-  ];
-  var i = 1;
+  var company = DataCompany;
   for (var c of company) {
-    var masp = i++;
-    if (sp.MaLSP == masp)
+    if (sp.MaLSP == c.MaLSP)
       s +=
         `<option value="` +
         sp.MaLSP +
         `" selected="selected">` +
-        c +
+        c.tenloaihang +
         `</option>`;
-    else s += `<option value="` + masp + `">` + c + `</option>`;
+    else s += `<option value="` + c.MaLSP + `">` + c.tenloaihang + `</option>`;
   }
   s +=
-    `</select>
-                </td>
-            </tr>
-            <?php
-                            $tenfilemoi= "";
-                                if (isset($_POST["submit"]))
-                                {
-                                    if (($_FILES["hinhanh"]["type"]=="image/jpeg") ||($_FILES["hinhanh"]["type"]=="image/png") || ($_FILES["hinhanh"]["type"]=="image/jpg") && ($_FILES["hinhanh"]["size"] < 50000) )
-                                    {
-                                        if ($_FILES["file"]["error"] > 0 || file_exists("img/products/" . basename($_FILES["hinhanh"]["name"]))) 
-                                        {
-                                            echo ("Error Code: " . $_FILES["file"]["error"] . "<br />Chỉnh sửa ảnh lại sau)");
-                                        }
-                                        else
-                                        {
-                                            /*$tmp = explode(".", $_FILES["hinhanh"]["name"]);
-                                            $duoifile = end($tmp);
-                                            $masp = $_POST['maspThem'];
-                                            $tenfilemoi = $masp . "." . $duoifile;*/
-                                            $file = $_FILES["hinhanh"]["name"];
-                                            $tenfilemoi = "img/products/" .$_FILES["hinhanh"]["name"];
-                                            move_uploaded_file( $_FILES["hinhanh"]["tmp_name"], $tenfilemoi);
-                                        }
-                                    }
-                                }
-                        // require_once ("php/uploadfile.php");
-                        ?>
-            <tr>
+    `
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
                             <td>Hình:</td>
                             <td>
-                                <img class="hinhDaiDien" id="anhDaiDienSanPhamThem" src="">
-                                <input type="file" name="hinhanh" onchange="capNhatAnhSanPham(this.files, 'anhDaiDienSanPhamThem', '<?php echo $tenfilemoi; ?>')">
+                                <img class="hinhDaiDien" id="anhDaiDienSanPhamSua" src="">
+                                <input type="file" name="hinhanh" onchange="uploadFileOnChange(this.files, 'anhDaiDienSanPhamSua')">
                                 <input style="display: none;" type="text" id="hinhanh" value="">
                             </td>
                         </tr>
-            <tr>
-                <td>Giá tiền:</td>
-                <td><input type="text" value="` +
-    sp.DonGia +
+                        <tr>
+                            <td>Giá tiền:</td>
+                            <td><input type="text" value="` +
+    sp.dongia +
     `"></td>
-            </tr>
-            <tr>
-                <td>Số sao:</td>
-                <td><input type="text" value="` +
+                        </tr>
+                        <tr>
+                            <td>Số lượng:</td>
+                            <td><input type="number" value="` +
+    sp.SoLuong +
+    `"></td>
+                        </tr>
+                        <tr>
+                            <td>Số sao:</td>
+                            <td><input disabled="disabled" value="` +
     sp.SoSao +
-    `"></td>
-            </tr>
-            <tr>
-                <td>Đánh giá:</td>
-                <td><input type="text" value="` +
+    `" type="number"></td>
+                        </tr>
+                        <tr>
+                            <td>Đánh giá:</td>
+                            <td><input disabled="disabled" value="` +
     sp.SoDanhGia +
-    `"></td>
-            </tr>
+    `" type="text"></td>
+                        </tr>
             <tr>
-                <td>Khuyến mãi:</td>
-                <td>
+               <td>Khuyến mãi:</td>
+           <td>
                     <select name="chonKhuyenMai" onchange="showGTKM()">`;
   var i = 1;
   s += `<option selected="selected" value="` + i++ + `">Không</option>`;
@@ -800,7 +939,10 @@ function addKhungSuaSanPham(masp) {
             <tr>
                 <td colspan="2"  class="table-footer"> <button name="submit">SỬA</button> </td>
             </tr>
-        </table>`;
+        </table>;
+                </form>
+                <div style="display: none;" id="hinhanh"></div>
+  `;
 
   var khung = document.getElementById("khungSuaSanPham");
   khung.innerHTML = s;
@@ -811,9 +953,8 @@ function addKhungSuaSanPham(masp) {
 function capNhatAnhSanPham(files, id, anh) {
   var url = "";
   if (files.length) url = window.URL.createObjectURL(files[0]);
-
   document.getElementById(id).src = url;
-  document.getElementById("hinhanh").value = anh;
+  document.getElementById("valueEdit").value = anh;
 }
 
 // Sắp Xếp sản phẩm
@@ -845,6 +986,37 @@ function getValueOfTypeInTable_SanPham(tr, loai) {
   return false;
 }
 
+function uploadFile(files) {
+  var file = files[0];
+  imgEdit = `img/products/${file.name}`;
+  var formData = new FormData();
+  formData.append("hinhanh", file);
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "uploadfile.php", true);
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      console.log(xhr.responseText);
+      // Xử lý kết quả từ server (response)
+    }
+  };
+  xhr.send(formData);
+}
+
+function uploadFileOnChange(files, imgId) {
+  var file = files[0];
+  var reader = new FileReader();
+
+  reader.onload = function (e) {
+    // Hiển thị ảnh khi đã chọn file
+    document.getElementById(imgId).src = e.target.result;
+
+    uploadFile(files);
+  };
+
+  reader.readAsDataURL(file);
+}
 // ========================= Đơn Hàng ===========================
 // Vẽ bảng
 
@@ -1141,7 +1313,6 @@ function addTableKhachHang(data) {
     .getElementsByClassName("khachhang")[0]
     .getElementsByClassName("table-content")[0];
   var s = `<table class="table-outline hideImg">`;
-
   for (var i = 0; i < data.length; i++) {
     var u = data[i];
     console.log(u.TrangThai);
@@ -1152,16 +1323,11 @@ function addTableKhachHang(data) {
       (i + 1) +
       `</td>
             <td >` +
-      u.Ho +
-      " " +
-      u.Ten +
+      u.HoVaTen +
       `</td>
             <td >` +
       u.Email +
       `</td>
-            <td >` +
-      u.TaiKhoan +
-      `</td>           
             <td >
                 <div class="tooltip">
                     <label class="switch">

@@ -40,11 +40,9 @@ function getListFromDB(list) {
               p.SoLuongTrongGio = g.soLuong;
             } else {
               p.SoLuongTrongGio = p.SoLuong;
-
               g.soLuong = Number(p.SoLuong); // thay dổi trong localstorage luôn
               setListGioHang(list); // cập nhật localstorage
               animateCartNumber();
-
               Swal.fire({
                 title: "Không đủ sản phẩm",
                 type: "error",
@@ -95,12 +93,15 @@ function addProductToTable(listProduct) {
   }
 
   var totalPrice = 0;
+  // số lượng trong giỏ hàng
+  var cartProduct = getListGioHang();
+
   for (var i = 0; i < listProduct.length; i++) {
     var p = listProduct[i];
+    var soluongHt = cartProduct[i]["soLuong"];
     var masp = p.MaSP;
-    var soluongSp = p.SoLuongTrongGio;
-    var price = Number(p.DonGia) - Number(p.KM.GiaTriKM);
-    var thanhtien = price * soluongSp;
+    var price = Number(p.dongia) - Number(p.KM.GiaTriKM);
+    var thanhtien = price * soluongHt;
 
     s +=
       `
@@ -128,7 +129,7 @@ function addProductToTable(listProduct) {
 					<input size="1" onchange="capNhatSoLuongFromInput(this, '` +
       masp +
       `')" value=` +
-      soluongSp +
+      soluongHt +
       `>
 					<button onclick="tangSoLuong('` +
       masp +
@@ -213,7 +214,6 @@ function thanhToan() {
     });
     return;
   }
-
   getCurrentUser(
     (user) => {
       if (user == null) {
@@ -230,15 +230,6 @@ function thanhToan() {
             showTaiKhoan(true);
           }
         });
-      } else if (user.TrangThai == 0) {
-        Swal.fire({
-          title: "Tài Khoản Bị Khóa!",
-          text: "Tài khoản của bạn hiện đang bị khóa nên không thể mua hàng!",
-          type: "error",
-          grow: "row",
-          confirmButtonText: "Trở về",
-          footer: "<a href>Liên hệ với Admin</a>",
-        });
       } else {
         UserHienTai = user; // biến toàn cục
         htmlThanhToan(user);
@@ -251,8 +242,6 @@ function thanhToan() {
 }
 
 function htmlThanhToan(userHienTai) {
-  console.log("abc");
-
   $("#thongtinthanhtoan").html(
     `
 		<form>
@@ -264,13 +253,13 @@ function htmlThanhToan(userHienTai) {
 		  <div class="form-group">
 		    <label for="inputTen">Tên người nhận</label>
 		    <input class="form-control input-sm" id="inputTen" required type="text" value="` +
-      (userHienTai.Ho + " " + userHienTai.Ten) +
+      userHienTai.HoVaTen +
       `">
 		  </div>
 		   <div class="form-group">
 		    <label for="inputSDT">SDT người nhận</label>
 		    <input class="form-control input-sm" id="inputSDT" required type="text" pattern="\\d*" minlength="10" maxlength="12" value="` +
-      userHienTai.SDT +
+      userHienTai.Sdt +
       `">
 		  </div>
 		  <div class="form-group">
@@ -303,6 +292,10 @@ function xacNhanThanhToan() {
     ngayLap: new Date().toMysqlFormat(),
   };
 
+  if (!dulieu.phuongThucTT) {
+    alert("Vui lòng chọn phương thức thanh toán !!!");
+    return;
+  }
   $.ajax({
     type: "POST",
     url: "php/xulythanhtoan.php",
@@ -313,6 +306,7 @@ function xacNhanThanhToan() {
     },
     success: function (data) {
       capNhatMoiThu([]);
+      $("#exampleModal").modal("hide");
     },
     error: function (e) {
       console.log(e.responseText);
@@ -361,13 +355,11 @@ function capNhatSoLuongFromInput(inp, masp) {
 
 function tangSoLuong(masp) {
   var listProduct = getListGioHang();
-
   for (var p of listProduct) {
     if (p.masp == masp) {
       p.soLuong++;
     }
   }
-
   capNhatMoiThu(listProduct);
 }
 
@@ -377,18 +369,15 @@ function giamSoLuong(masp) {
   for (var p of listProduct) {
     if (p.masp == masp && p.soLuong > 1) {
       p.soLuong--;
+      capNhatMoiThu(listProduct);
     }
   }
-
-  capNhatMoiThu(listProduct);
 }
 
 function capNhatMoiThu(list) {
-  // Mọi thứ
-  animateCartNumber();
-
   setListGioHang(list);
-
   // cập nhật danh sách sản phẩm ở table
   getListFromDB(list);
+  // Mọi thứ
+  animateCartNumber();
 }
