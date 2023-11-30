@@ -25,7 +25,7 @@
             break;
         case 'getlistbyids':
             $listID = $_POST['listID'];
-            $sql = "SELECT * FROM SanPham WHERE ";
+            $sql = "SELECT * FROM hang WHERE ";
 
             forEach($listID as $id) {
                 $sql .= "MaSP=".$id." OR ";
@@ -124,7 +124,7 @@
 
     function phanTich_Filters() {
         $filters = $_POST['filters'];
-        $ori = "SELECT * FROM sanpham WHERE TrangThai=1 AND SoLuong>0 AND ";
+        $ori = "SELECT * FROM hang WHERE TrangThai=1 AND SoLuong>0 AND ";
         $sql = $ori;
         $db = new DB_driver();
         $db->connect();
@@ -220,7 +220,7 @@
         $spBUS = new SanPhamBUS();
 
         $sp = $_POST['sanpham'];
-        $loaisanpham = (new DB_driver())->get_row("SELECT * FROM LoaiSanPham WHERE TenLSP='".$sp["company"]."'");
+        $loaisanpham = (new DB_driver())->get_row("SELECT * FROM loaihang WHERE TenLSP='".$sp["company"]."'");
 
         $sanphamArr = array(
             'MaSP' => "",

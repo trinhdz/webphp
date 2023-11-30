@@ -1,6 +1,8 @@
 var TONGTIEN = 0;
 var DataCompany = [];
 var imgEdit;
+var imgEditCompany = null;
+var list_category = [];
 
 let listCategoryOrder = [];
 let listCategoryOrderValue = [];
@@ -43,6 +45,30 @@ function refreshTableSanPham() {
     success: function (data, status, xhr) {
       list_products = data; // biến toàn cục lưu trữ mảng sản phẩm hiện có
       addTableProducts(data);
+    },
+    error: function (e) {
+      Swal.fire({
+        type: "error",
+        title: "Lỗi lấy dữ liệu sản phẩm (admin.js > refreshTableSanPham)",
+        html: e.responseText,
+      });
+      console.log(e.responseText);
+    },
+  });
+}
+
+function refreshTableLoaiSanPham() {
+  $.ajax({
+    type: "POST",
+    url: "php/xulyloaisanpham.php",
+    dataType: "json",
+    // timeout: 1500, // sau 1.5 giây mà không phản hồi thì dừng => hiện lỗi
+    data: {
+      request: "getall",
+    },
+    success: function (data, status, xhr) {
+      list_category = data;
+      addTableCategory(data);
     },
     error: function (e) {
       Swal.fire({
@@ -206,6 +232,9 @@ function ajaxLoaiSanPham() {
 }
 
 function showLoaiSanPham(data) {
+  if (!data) {
+    return;
+  }
   var s = "";
   for (var i = 0; i < data.length; i++) {
     var p = data[i];
@@ -232,6 +261,9 @@ function ajaxKhuyenMai() {
 }
 
 function showKhuyenMai(data) {
+  if (!data) {
+    return;
+  }
   var s =
     `
         <option selected="selected" value="` +
@@ -314,6 +346,9 @@ function openTab(nameTab) {
 
   // mở tab
   switch (nameTab) {
+    case "Loại Sản Phẩm":
+      document.getElementsByClassName("loaisanpham")[0].style.display = "block";
+      break;
     case "Sản Phẩm":
       document.getElementsByClassName("sanpham")[0].style.display = "block";
       break;
@@ -327,6 +362,67 @@ function openTab(nameTab) {
       document.getElementsByClassName("thongke")[0].style.display = "block";
       break;
   }
+}
+// ==========================Loại Sản Phẩm ========================
+// Vẽ bảng danh sách loại sản phẩm
+function addTableCategory(data) {
+  var tc = document
+    .getElementsByClassName("loaisanpham")[0]
+    .getElementsByClassName("table-content")[0];
+  var s = `<table class="table-outline hideImg">`;
+
+  for (var i = 0; i < data.length; i++) {
+    var p = data[i];
+    s +=
+      `<tr>
+            <td style="width: 5%">` +
+      (i + 1) +
+      `</td>
+      <td  style="width: 10%">
+        ` +
+      p.MaLSP +
+      `
+      </td>
+      <td style="width: 30%">
+      ` +
+      p.tenloaihang +
+      `
+           <img src="img/company/` +
+      p.HinhAnh +
+      `"></img>
+      </td>
+      <td style="width: 15%">
+      ` +
+      p.nhasx +
+      `
+      </td>
+      <td style="width: 30%">
+      ` +
+      p.Mota +
+      `
+      </td>
+        <td style="width: 10%">
+                   <div class="tooltip">
+                    <i class="fa fa-wrench" onclick="addKhungSuaLoaiSanPham('` +
+      p.MaLSP +
+      `')"></i>
+                    <span class="tooltiptext">Sửa</span>
+                </div>
+                <div class="tooltip">
+                    <i class="fa fa-trash" onclick="xoaLoaiSanPham('` +
+      p.MaLSP +
+      `','` +
+      p.tenloaihang +
+      `')"></i>
+                    <span class="tooltiptext">Xóa</span>
+                </div>
+            </td>
+        </tr>`;
+  }
+
+  s += `</table>`;
+
+  tc.innerHTML = s;
 }
 
 // ========================== Sản Phẩm ========================
@@ -393,6 +489,34 @@ function addTableProducts(list_products) {
 }
 
 // Tìm kiếm
+// Tìm kiếm
+function timKiemLoaiSanPham(inp) {
+  var kieuTim = document.getElementsByName("kieuLoaiTimSanPham")[0].value;
+  var text = inp.value;
+
+  // Lọc
+  var vitriKieuTim = {
+    ma: 1,
+    ten: 2,
+  }; // mảng lưu vị trí cột
+
+  var listTr_table = document
+    .getElementsByClassName("loaisanpham")[0]
+    .getElementsByClassName("table-content")[0]
+    .getElementsByTagName("tr");
+  for (var tr of listTr_table) {
+    var td = tr
+      .getElementsByTagName("td")
+      [vitriKieuTim[kieuTim]].innerHTML.toLowerCase();
+
+    if (td.indexOf(text.toLowerCase()) < 0) {
+      tr.style.display = "none";
+    } else {
+      tr.style.display = "";
+    }
+  }
+}
+
 function timKiemSanPham(inp) {
   var kieuTim = document.getElementsByName("kieuTimSanPham")[0].value;
   var text = inp.value;
@@ -418,6 +542,70 @@ function timKiemSanPham(inp) {
       tr.style.display = "";
     }
   }
+}
+
+function themLoaiSanPham(event) {
+  event.preventDefault();
+  var khung = document.getElementById("khungThemLoaiSanPham");
+
+  // Lấy giá trị từ các ô input
+
+  var maLoaiSP = khung.querySelector("#malspThem").value;
+
+  var tenLoaiSP = khung.querySelector("#tenLspThem").value;
+
+  var nhaSanXuat = khung.querySelector("#TenNhaSanXuat").value;
+
+  var moTa = khung.querySelector("#TenMoTa").value;
+  // Thực hiện kiểm tra dữ liệu
+  if (
+    maLoaiSP === "" ||
+    tenLoaiSP === "" ||
+    imgEditCompany === null ||
+    nhaSanXuat === "" ||
+    moTa === ""
+  ) {
+    // Nếu dữ liệu không hợp lệ, hiển thị thông báo hoặc xử lý theo ý muốn của bạn
+    alert("Vui lòng nhập đầy đủ thông tin!");
+  }
+
+  let dataAdd = {
+    maLoaiSP,
+    tenLoaiSP,
+    nhaSanXuat,
+    imgEditCompany,
+    moTa,
+  };
+  $.ajax({
+    type: "POST",
+    url: "php/xulyloaisanpham.php",
+    dataType: "json",
+    // timeout: 1500, // sau 1.5 giây mà không phản hồi thì dừng => hiện lỗi
+    data: {
+      request: "add",
+      dataAdd,
+    },
+    success: function (data, status, xhr) {
+      Swal.fire({
+        type: "success",
+        title: "Thêm thành công",
+      });
+      resetFormCategory();
+      document.getElementById("khungThemLoaiSanPham").style.transform =
+        "scale(0)";
+      refreshTableLoaiSanPham();
+    },
+    error: function (e) {
+      Swal.fire({
+        type: "error",
+        title: "Lỗi add",
+        html: e.responseText,
+      });
+    },
+  });
+
+  alert('Thêm loại sản phẩm "' + dataAdd.tenLoaiSP + '" thành công.');
+  refreshTableLoaiSanPham();
 }
 
 function themSanPham() {
@@ -467,6 +655,22 @@ function themSanPham() {
 
   alert('Thêm sản phẩm "' + newSp.name + '" thành công.');
   refreshTableSanPham();
+}
+
+function resetFormCategory() {
+  var khung = document.getElementById("khungThemLoaiSanPham");
+
+  imgEditCompany = null;
+
+  khung.querySelector("#malspThem").value = "";
+  khung.querySelector("#anhDaiDienLoaiSanPhamThem").src = null;
+  khung.querySelector("#hinhanh").value = null;
+
+  khung.querySelector("#tenLspThem").value = "";
+
+  khung.querySelector("#TenNhaSanXuat").value = "";
+
+  khung.querySelector("#TenMoTa").value = "";
 }
 
 function resetForm() {
@@ -537,7 +741,42 @@ function autoMaSanPham(company) {
   document.getElementById("maspThem").value = parseInt(autoMaSP) + 1;
 }
 
+function autoMaLoaiSanPham(company) {
+  // hàm tự tạo mã cho sản phẩm mới
+  var autoMaLSP = list_category[list_category.length - 1].MaLSP;
+  document.getElementById("malspThem").value = parseInt(autoMaLSP) + 1;
+}
+
 // Xóa
+
+function xoaLoaiSanPham(malsp, tenlsp) {
+  if (window.confirm("Bạn có chắc muốn xóa " + tenlsp)) {
+    // Xóa
+    $.ajax({
+      type: "POST",
+      url: "php/xulyloaisanpham.php",
+      dataType: "json",
+      // timeout: 1500, // sau 1.5 giây mà không phản hồi thì dừng => hiện lỗi
+      data: {
+        request: "delete",
+        malsp,
+      },
+      success: function (data, status, xhr) {
+        refreshTableLoaiSanPham();
+      },
+      error: function () {
+        Swal.fire({
+          type: "error",
+          title: "Lỗi xóa",
+        });
+      },
+    });
+
+    // Vẽ lại table
+    refreshTableLoaiSanPham();
+  }
+}
+
 function xoaSanPham(trangthai, masp, tensp) {
   if (trangthai == 1) {
     // alert ("Sản phẩm còn đang bán");
@@ -586,7 +825,9 @@ function xoaSanPham(trangthai, masp, tensp) {
           request: "delete",
           maspdelete: masp,
         },
-        success: function (data, status, xhr) {},
+        success: function (data, status, xhr) {
+          refreshTableSanPham();
+        },
         error: function () {
           Swal.fire({
             type: "error",
@@ -638,10 +879,6 @@ function layThongTinSanPhamTuTable(id) {
   var promoName = tr[9]
     .getElementsByTagName("td")[1]
     .getElementsByTagName("select")[0].value;
-  console.log(
-    "🚀 ~ file: admin.js:381 ~ layThongTinSanPhamTuTable ~ promoName:",
-    promoName
-  );
 
   var promoValue = tr[10]
     .getElementsByTagName("td")[1]
@@ -703,6 +940,71 @@ function layThongTinSanPhamTuTable(id) {
   };
 }
 // Sửa
+
+function suaLoaiSanPham(event) {
+  event.preventDefault();
+
+  var khung = document.getElementById("khungSuaLoaiSanPham");
+
+  // Lấy giá trị từ các ô input
+
+  var maLoaiSP = khung.querySelector("#malspThem").value;
+
+  var tenLoaiSP = khung.querySelector("#tenLspThem").value;
+
+  var nhaSanXuat = khung.querySelector("#TenNhaSanXuat").value;
+
+  var moTa = khung.querySelector("#TenMoTa").value;
+  // Thực hiện kiểm tra dữ liệu
+  if (
+    maLoaiSP === "" ||
+    tenLoaiSP === "" ||
+    imgEditCompany === null ||
+    nhaSanXuat === "" ||
+    moTa === ""
+  ) {
+    // Nếu dữ liệu không hợp lệ, hiển thị thông báo hoặc xử lý theo ý muốn của bạn
+    alert("Vui lòng nhập đầy đủ thông tin!");
+    return;
+  }
+
+  let dataEdit = {
+    maLoaiSP,
+    tenLoaiSP,
+    nhaSanXuat,
+    imgEditCompany,
+    moTa,
+  };
+
+  $.ajax({
+    type: "POST",
+    url: "php/xulyloaisanpham.php",
+    dataType: "json",
+    // timeout: 1500, // sau 1.5 giây mà không phản hồi thì dừng => hiện lỗi
+    data: {
+      request: "edit",
+      dataEdit,
+    },
+    success: function (data, status, xhr) {
+      Swal.fire({
+        type: "success",
+        title: "Sửa thành công",
+      });
+      resetFormCategory();
+      document.getElementById("khungSuaLoaiSanPham").style.transform =
+        "scale(0)";
+      refreshTableLoaiSanPham();
+    },
+    error: function (e) {
+      Swal.fire({
+        type: "error",
+        title: "Lỗi edit",
+        html: e.responseText,
+      });
+    },
+  });
+  refreshTableLoaiSanPham();
+}
 function suaSanPham(event) {
   event.preventDefault();
 
@@ -949,6 +1251,70 @@ function addKhungSuaSanPham(masp) {
   khung.style.transform = "scale(1)";
 }
 
+function addKhungSuaLoaiSanPham(malsp) {
+  var sp;
+  for (var p of list_category) {
+    if (p.MaLSP == malsp) {
+      sp = p;
+    }
+  }
+  var s =
+    `
+   <span class="close" onclick="this.parentElement.style.transform = 'scale(0)';">&times;</span>
+                <form method="post" action="" enctype="multipart/form-data" onsubmit="return suaLoaiSanPham(event);">
+                    <table class="overlayTable table-outline table-content table-header">
+                        <tr>
+                            <th colspan="2">Sửa loại sản phẩm</th>
+                        </tr>
+                        <tr>
+                            <td>Mã loại sản phẩm:</td>
+                            <td><input disabled="disabled" type="text" id="malspThem" name="maspThem" value="` +
+    sp.MaLSP +
+    `"></td>
+                        </tr>
+                        <tr>
+                            <td>Tên loại sản phẩm:</td>
+                            <td><input type="text" id="tenLspThem" value="` +
+    sp.tenloaihang +
+    `"></td>
+                        </tr>
+                        <tr>
+                            <td>Hình:</td>
+                            <td>
+                                <img class="hinhDaiDien" id="anhDaiDienLoaiSanPhamThem" src="">
+                                <input type="file" name="hinhanh" onchange="uploadFileOnChangeCategory(this.files, 'anhDaiDienLoaiSanPhamThem')">
+                                <input style="display: none;" type="text" id="hinhanh" value="">
+                            </td>
+                        </tr>
+
+                         </tr>
+                           <tr>
+                            <td>Nhà sản xuất:</td>
+                            <td><input type="text" id="TenNhaSanXuat"
+                            value="` +
+    sp.nhasx +
+    `"
+                            ></td>
+                        </tr>
+                        <tr>
+                            <td>Mô tả:</td>
+                            <td><input type="text"  id="TenMoTa" value="` +
+    sp.Mota +
+    `"></td>
+    </tr>
+            <tr>
+                <td colspan="2"  class="table-footer"> <button name="submit">SỬA</button> </td>
+            </tr>
+        </table>;
+                </form>
+                <div style="display: none;" id="hinhanh"></div>
+  `;
+
+  var khung = document.getElementById("khungSuaLoaiSanPham");
+  khung.innerHTML = s;
+  khung.style.transform = "scale(1)";
+}
+
 // Cập nhật ảnh sản phẩm
 function capNhatAnhSanPham(files, id, anh) {
   var url = "";
@@ -1004,6 +1370,24 @@ function uploadFile(files) {
   xhr.send(formData);
 }
 
+function uploadFileCategory(files) {
+  var file = files[0];
+  imgEditCompany = `${file.name}`;
+  var formData = new FormData();
+  formData.append("hinhanh", file);
+
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "uploadfileCategory.php", true);
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      console.log(xhr.responseText);
+      // Xử lý kết quả từ server (response)
+    }
+  };
+  xhr.send(formData);
+}
+
 function uploadFileOnChange(files, imgId) {
   var file = files[0];
   var reader = new FileReader();
@@ -1011,10 +1395,20 @@ function uploadFileOnChange(files, imgId) {
   reader.onload = function (e) {
     // Hiển thị ảnh khi đã chọn file
     document.getElementById(imgId).src = e.target.result;
-
     uploadFile(files);
   };
+  reader.readAsDataURL(file);
+}
 
+function uploadFileOnChangeCategory(files, imgId) {
+  var file = files[0];
+  var reader = new FileReader();
+
+  reader.onload = function (e) {
+    // Hiển thị ảnh khi đã chọn file
+    document.getElementById(imgId).src = e.target.result;
+    uploadFileCategory(files);
+  };
   reader.readAsDataURL(file);
 }
 // ========================= Đơn Hàng ===========================
@@ -1031,9 +1425,9 @@ function refreshTableDonHang() {
     },
     success: function (data, status, xhr) {
       addTableDonHang(data);
-      console.log(data);
     },
     error: function (e) {
+      console.log(e);
       Swal.fire({
         type: "error",
         title: "Lỗi lấy dữ liệu khách Hàng (admin.js > refreshTableKhachHang)",
@@ -1043,6 +1437,10 @@ function refreshTableDonHang() {
   });
 }
 function addTableDonHang(data) {
+  if (!data) {
+    return;
+  }
+  console.log("🚀 ~ file: admin.js:1441 ~ addTableDonHang ~ data:", data);
   var tc = document
     .getElementsByClassName("donhang")[0]
     .getElementsByClassName("table-content")[0];
@@ -1062,37 +1460,35 @@ function addTableDonHang(data) {
             <td style="width: 7%">` +
       d.MaND +
       `</td>
-            <td style="width: 20%">` +
-      /*d.sp*/ +`</td>
+           
             <td style="width: 15%">` +
       d.TongTien +
       `</td>
-            <td style="width: 10%">` +
+            <td style="width: 30%">` +
       d.NgayLap +
       `</td>
             <td style="width: 10%">` +
-      d.TinhTrang +
+      d.TrangThai +
       `</td>
             <td style="width: 10%">
                 <div class="tooltip">
                     <i class="fa fa-check" onclick="duyet('` +
       d.MaHD +
-      `', true)"></i>
+      `','Đã giao')"></i>
                     <span class="tooltiptext">Duyệt</span>
                 </div>
                 <div class="tooltip">
                     <i class="fa fa-remove" onclick="duyet('` +
       d.MaHD +
-      `', false)"></i>
+      `','Đã Hủy')"></i>
                     <span class="tooltiptext">Hủy</span>
                 </div>
-                
             </td>
         </tr>`;
-    TONGTIEN += stringToNum(d.tongtien);
   }
 
   s += `</table>`;
+
   tc.innerHTML = s;
 }
 
@@ -1136,42 +1532,27 @@ function getListDonHang() {
   return result;
 }
 
-// Duyệt
-function duyet(maDonHang, duyetDon) {
-  var u = getListUser();
-  for (var i = 0; i < u.length; i++) {
-    for (var j = 0; j < u[i].donhang.length; j++) {
-      if (u[i].donhang[j].ngaymua == maDonHang) {
-        if (duyetDon) {
-          if (u[i].donhang[j].tinhTrang == "Đang chờ xử lý") {
-            u[i].donhang[j].tinhTrang = "Đã giao hàng";
-          } else if (u[i].donhang[j].tinhTrang == "Đã hủy") {
-            alert("Không thể duyệt đơn đã hủy !");
-            return;
-          }
-        } else {
-          if (u[i].donhang[j].tinhTrang == "Đang chờ xử lý") {
-            if (
-              window.confirm(
-                "Bạn có chắc muốn hủy đơn hàng này. Hành động này sẽ không thể khôi phục lại !"
-              )
-            )
-              u[i].donhang[j].tinhTrang = "Đã hủy";
-          } else if (u[i].donhang[j].tinhTrang == "Đã giao hàng") {
-            alert("Không thể hủy đơn hàng đã giao !");
-            return;
-          }
-        }
-        break;
+function duyet(maDonHang, tt) {
+  $.ajax({
+    type: "POST",
+    url: "php/xulydonhang.php", // Replace with the actual path to your API
+    data: {
+      request: "update",
+      maDonHang,
+      trangThai: tt,
+    },
+    success: function (response) {
+      var result = JSON.parse(response);
+      if (result.success) {
+        refreshTableDonHang();
+      } else {
+        console.error(result.message);
       }
-    }
-  }
-
-  // lưu lại
-  setListUser(u);
-
-  // vẽ lại
-  addTableDonHang();
+    },
+    error: function (xhr, status, error) {
+      console.error("Error occurred while updating: " + error);
+    },
+  });
 }
 
 function locDonHangTheoKhoangNgay() {
@@ -1268,7 +1649,6 @@ function refreshTableKhachHang() {
     },
     success: function (data, status, xhr) {
       addTableKhachHang(data);
-      //console.log(data);
     },
     error: function (e) {
       Swal.fire({
@@ -1315,8 +1695,7 @@ function addTableKhachHang(data) {
   var s = `<table class="table-outline hideImg">`;
   for (var i = 0; i < data.length; i++) {
     var u = data[i];
-    console.log(u.TrangThai);
-
+    console.log(u);
     s +=
       `<tr>
             <td >` +
@@ -1334,7 +1713,7 @@ function addTableKhachHang(data) {
                         <input type="checkbox" ` +
       (u.TrangThai == 1 ? "checked" : "") +
       ` onclick="thayDoiTrangThaiND(this, '` +
-      u.MaND +
+      u.Id +
       `')">
                  
                     </label>
@@ -1344,7 +1723,7 @@ function addTableKhachHang(data) {
                 </div>
                 <div class="tooltip">
                     <i class="fa fa-remove" onclick="xoaNguoiDung('` +
-      u.MaND +
+      u.Id +
       `')"></i>
                     <span class="tooltiptext">Xóa</span>
                 </div>
@@ -1406,27 +1785,26 @@ function xoaNguoiDung(mand) {
     cancelButtonText: "Hủy",
   }).then((result) => {
     if (result.value) {
-      $.ajax({
-        type: "POST",
-        url: "php/xulykhachhang.php",
-        dataType: "json",
-        // timeout: 1500, // sau 1.5 giây mà không phản hồi thì dừng => hiện lỗi
-        data: {
-          request: "delete",
-          mand: mand,
-        },
-        success: function (data, status, xhr) {
-          refreshTableKhachHang();
-          //console.log(data);
-        },
-        error: function (e) {
-          // Swal.fire({
-          //     type: "error",
-          //     title: "Lỗi lấy dữ liệu khách Hàng (admin.js > refreshTableKhachHang)",
-          //     html: e.responseText
-          // });
-          console.log(e.responseText);
-        },
+      getCurrentUser((user) => {
+        if (user.Id === mand) {
+          alert("Bạn không được xóa chính mình !!!");
+        } else {
+          $.ajax({
+            type: "POST",
+            url: "php/xulykhachhang.php",
+            dataType: "json",
+            data: {
+              request: "delete",
+              mand: mand,
+            },
+            success: function (data, status, xhr) {
+              refreshTableKhachHang();
+            },
+            error: function (e) {
+              console.log(e.responseText);
+            },
+          });
+        }
       });
     }
   });

@@ -20,7 +20,7 @@ class SanPhamBUS extends DB_business
 {
     function __construct()
     {
-        $this->setTable("SanPham", "MaSP");
+        $this->setTable("hang", "MaSP");
     }
 
     function capNhapTrangThai($trangthai, $id) {
@@ -52,7 +52,7 @@ class LoaiSanPhamBUS extends DB_business
 {
     function __construct()
     {
-        $this->setTable("LoaiSanPham", "MaLSP");
+        $this->setTable("loaihang", "MaLSP");
     }
 }
 
@@ -95,6 +95,8 @@ class HoaDonBUS extends DB_business
         $sql = "SELECT * FROM hoadon WHERE MaND=$mand";
         $dsdh = (new HoaDonBUS())->get_list($sql);
     }
+ 
+
 }
 
 // Lớp tài khoản
@@ -131,9 +133,11 @@ class ChiTietHoaDonBUS extends DB_business
 
     function __construct()
     {
-        $this->setTable("ChiTietHoaDon", "MaHD");
+        $this->setTable("chitiethangban", "MaHD");
         $this->_key2 = "MaSP";
     }
+
+      
 
     // Hàm xóa theo id hóa đơn và id sản phẩm
     function delete_by_2id($id, $id2)

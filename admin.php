@@ -40,11 +40,12 @@
     <aside class="sidebar">
         <ul class="nav">
             <li class="nav-title">MENU</li>
-            <!-- <li class="nav-item"><a class="nav-link active"><i class="fa fa-home"></i> Home</a></li> -->
-            <li class="nav-item" onclick="refreshTableSanPham()"><a class="nav-link"><i class="fa fa-th-large"></i> Sản Phẩm</a></li>
-            <!-- <li class="nav-item" onclick="refreshTableDonHang()"><a class="nav-link"><i class="fa fa-file-text-o"></i> Đơn Hàng</a></li> -->
-            <li class="nav-item" onclick="refreshTableKhachHang()"><a class="nav-link"><i class="fa fa-address-book-o"></i> Khách Hàng</a></li>
             <li class="nav-item"><a class="nav-link active"><i class="fa fa-bar-chart-o"></i> Thống Kê</a></li>
+            <!-- <li class="nav-item"><a class="nav-link active"><i class="fa fa-home"></i> Home</a></li> -->
+            <li class="nav-item" onclick="refreshTableLoaiSanPham()"><a class="nav-link"><i class="fa fa-th-large"></i> Loại Sản Phẩm</a></li>
+            <li class="nav-item" onclick="refreshTableSanPham()"><a class="nav-link"><i class="fa fa-th-large"></i> Sản Phẩm</a></li>
+            <li class="nav-item" onclick="refreshTableDonHang()"><a class="nav-link"><i class="fa fa-file-text-o"></i> Đơn Hàng</a></li>
+            <li class="nav-item" onclick="refreshTableKhachHang()"><a class="nav-link"><i class="fa fa-address-book-o"></i> Khách Hàng</a></li>
             <hr>
             <li class="nav-item">
                 <a class="nav-link" id="btnDangXuat">
@@ -239,7 +240,79 @@
             </div>
             <div id="khungSuaSanPham" class="overlay"></div>
         </div> <!-- // sanpham -->
+        <div class="loaisanpham">
+            <table class="table-header">
+                <tr>
+                    <!-- Theo độ rộng của table content -->
+                    <th title="Sắp xếp" style="width: 5%" >Stt </th>
+                    <th title="Sắp xếp" style="width: 10%" >Mã LSP </th>
+                    <th title="Sắp xếp" style="width: 30%" >Tên </th>
+                    <th title="Sắp xếp" style="width: 15%" >Nhà Sản Xuất </th>
+                    <th title="Sắp xếp" style="width: 30%" >Mô tả </th>
+                    <th style="width: 10%">Hành động</th>
+                </tr>
+            </table>
 
+            <div class="table-content">
+            </div>
+
+            <div class="table-footer">
+                <select name="kieuLoaiTimSanPham">
+                    <option value="ma">Tìm theo mã</option>
+                    <option value="ten">Tìm theo tên</option>
+                </select>
+                <input type="text" placeholder="Tìm kiếm..." onkeyup="timKiemLoaiSanPham(this)">
+                <button onclick="document.getElementById('khungThemLoaiSanPham').style.transform = 'scale(1)'; autoMaLoaiSanPham()">
+                    <i class="fa fa-plus-square"></i>
+                    Thêm loai sản phẩm
+                </button>
+                <button onclick="refreshTableLoaiSanPham()">
+                    <i class="fa fa-refresh"></i>
+                    Làm mới
+                </button>
+            </div>
+
+            <div id="khungThemLoaiSanPham" class="overlay">
+                <span class="close" onclick="this.parentElement.style.transform = 'scale(0)';">&times;</span>
+                <form method="post" action="" enctype="multipart/form-data" onsubmit="return themLoaiSanPham(event);">
+                    <table class="overlayTable table-outline table-content table-header">
+                        <tr>
+                            <th colspan="2">Thêm Loại Sản Phẩm</th>
+                        </tr>
+                        <tr>
+                            <td>Mã Loại sản phẩm:</td>
+                            <td><input disabled="disabled" type="text" id="malspThem" name="maspThem"></td>
+                        </tr>
+                        <tr>
+                            <td>Tên Loại sản phẩm:</td>
+                            <td><input type="text" id="tenLspThem"></td>
+                        </tr>
+
+                        <tr>
+                            <td>Hình:</td>
+                            <td>
+                                <img class="hinhDaiDien" id="anhDaiDienLoaiSanPhamThem" src="">
+                                <input type="file" name="hinhanh" onchange="uploadFileOnChangeCategory(this.files, 'anhDaiDienLoaiSanPhamThem')">
+                                <input style="display: none;" type="text" id="hinhanh" value="">
+                            </td>
+                        </tr>
+                           <tr>
+                            <td>Nhà sản xuất:</td>
+                            <td><input type="text" id="TenNhaSanXuat"></td>
+                        </tr>
+                           <tr>
+                            <td>Mô tả:</td>
+                            <td><input type="text" id="TenMoTa"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="table-footer"> <button name="submit">THÊM</button> </td>
+                        </tr>
+                    </table>
+                </form>
+                <div style="display: none;" id="hinhanh"></div>
+            </div>
+            <div id="khungSuaLoaiSanPham" class="overlay"></div>
+        </div> 
 
         <!-- Đơn Hàng -->
         <div class="donhang">
@@ -249,9 +322,8 @@
                     <th title="Sắp xếp" style="width: 5%" onclick="sortDonHangTable('stt')">Stt <i class="fa fa-sort"></i></th>
                     <th title="Sắp xếp" style="width: 13%" onclick="sortDonHangTable('madon')">Mã đơn <i class="fa fa-sort"></i></th>
                     <th title="Sắp xếp" style="width: 7%" onclick="sortDonHangTable('khach')">Khách <i class="fa fa-sort"></i></th>
-                    <th title="Sắp xếp" style="width: 20%" onclick="sortDonHangTable('sanpham')">Sản phẩm <i class="fa fa-sort"></i></th>
                     <th title="Sắp xếp" style="width: 15%" onclick="sortDonHangTable('tongtien')">Tổng tiền <i class="fa fa-sort"></i></th>
-                    <th title="Sắp xếp" style="width: 10%" onclick="sortDonHangTable('ngaygio')">Ngày giờ <i class="fa fa-sort"></i></th>
+                    <th title="Sắp xếp" style="width: 30%" onclick="sortDonHangTable('ngaygio')">Ngày giờ <i class="fa fa-sort"></i></th>
                     <th title="Sắp xếp" style="width: 10%" onclick="sortDonHangTable('trangthai')">Trạng thái <i class="fa fa-sort"></i></th>
                     <th style="width: 10%">Hành động</th>
                 </tr>
@@ -270,7 +342,7 @@
 
                 <select name="kieuTimDonHang">
                     <option value="ma">Tìm theo mã đơn</option>
-                    <option value="khachhang">Tìm theo tên khách hàng</option>
+                    <option value="khachhang">Tìm theo id khách hàng</option>
                     <option value="trangThai">Tìm theo trạng thái</option>
                 </select>
                 <input type="text" placeholder="Tìm kiếm..." onkeyup="timKiemDonHang(this)">

@@ -12,11 +12,11 @@ $sqlOrder = "SELECT
             pc.tenloaihang AS Category,
             COUNT(id.MaSP) AS TotalSold
         FROM
-            loaisanpham pc
+            loaihang pc
         JOIN
-            sanpham p ON pc.MaLSP = p.MaLSP
+            hang p ON pc.MaLSP = p.MaLSP
         JOIN
-            chitiethoadon id ON p.MaSP = id.MaSP
+            chitiethangban id ON p.MaSP = id.MaSP
         GROUP BY
             pc.tenloaihang";
 
@@ -24,9 +24,9 @@ $sqlProduct = "SELECT
     pc.tenloaihang AS Category,
     SUM(p.SoLuong) AS TotalSold
 FROM
-    loaisanpham pc
+    loaihang pc
 JOIN
-    sanpham p ON pc.MaLSP = p.MaLSP
+    hang p ON pc.MaLSP = p.MaLSP
 GROUP BY
     pc.tenloaihang";
   

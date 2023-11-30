@@ -6,7 +6,7 @@
 	if (isset($_SESSION['currentUser'])) {
 		$mahd = $_GET['mahd'];
 	
-		$sql="SELECT * FROM chitiethoadon WHERE MaHD=$mahd";
+		$sql="SELECT * FROM chitiethangban WHERE MaHD=$mahd";
 		$dscthd=(new DB_driver())->get_list($sql);
 
 		for($i = 0; $i < sizeof($dscthd); $i++) {
